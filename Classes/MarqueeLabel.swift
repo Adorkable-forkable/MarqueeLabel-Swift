@@ -9,7 +9,7 @@ import UIKit
 import QuartzCore
 
 
-public class MarqueeLabel: UILabel {
+public class MarqueeLabel: UILabel, CAAnimationDelegate {
     
     /**
     An enum that defines the types of `MarqueeLabel` scrolling
@@ -75,7 +75,7 @@ public class MarqueeLabel: UILabel {
         didSet {
             if tapToScroll != oldValue {
                 if tapToScroll {
-                    let tapRecognizer = UITapGestureRecognizer(target: self, action: "labelWasTapped:")
+                    let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(MarqueeLabel.labelWasTapped(_:)))
                     self.addGestureRecognizer(tapRecognizer)
                     userInteractionEnabled = true
                 } else {
@@ -289,12 +289,12 @@ public class MarqueeLabel: UILabel {
         
         // Add notification observers
         // Custom class notifications
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "restartForViewController:", name: MarqueeKeys.Restart.rawValue, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "labelizeForController:", name: MarqueeKeys.Labelize.rawValue, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "animateForController:", name: MarqueeKeys.Animate.rawValue, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MarqueeLabel.restartForViewController(_:)), name: MarqueeKeys.Restart.rawValue, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MarqueeLabel.labelizeForController(_:)), name: MarqueeKeys.Labelize.rawValue, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MarqueeLabel.animateForController(_:)), name: MarqueeKeys.Animate.rawValue, object: nil)
         // UIApplication state notifications
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "restartLabel", name: UIApplicationDidBecomeActiveNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "shutdownLabel", name: UIApplicationDidEnterBackgroundNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MarqueeLabel.restartLabel), name: UIApplicationDidBecomeActiveNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(MarqueeLabel.shutdownLabel), name: UIApplicationDidEnterBackgroundNotification, object: nil)
     }
     
     override public func awakeFromNib() {
@@ -557,7 +557,7 @@ public class MarqueeLabel: UILabel {
     }
     
     private func awayFromHome() -> Bool {
-        if let presentationLayer = sublabel.layer.presentationLayer() as? CALayer {
+        if let presentationLayer = sublabel.layer.presentationLayer() {
             return !(presentationLayer.position.x == homeLabelFrame.origin.x)
         }
         
@@ -973,8 +973,8 @@ public class MarqueeLabel: UILabel {
             return NSTimeInterval(delay + interval)
         }
     }
-    
-    override public func animationDidStop(anim: CAAnimation, finished flag: Bool) {
+
+    public func animationDidStop(anim: CAAnimation, finished flag: Bool) {
         if let finalColors = anim.valueForKey("setupFade") as? [CGColorRef] {
             if flag {
                 let gradientMask = self.layer.mask as? CAGradientLayer
@@ -1338,7 +1338,7 @@ private extension CAMediaTimingFunction {
         var t1 = y_0
         var f0, df0: CGFloat
         
-        for (var i = 0; i < 15; i++) {
+        for (var i = 0; i < 15; i += 1) {
             // Base this iteration of t1 calculated from last iteration
             t0 = t1
             // Calculate f(t0)
@@ -1411,7 +1411,7 @@ private extension CAMediaTimingFunction {
         // Create point array to point to
         var point: [Float] = [0.0, 0.0]
         var pointArray = [CGPoint]()
-        for (var i: Int = 0; i <= 3; i++) {
+        for (var i: Int = 0; i <= 3; i += 1) {
             self.getControlPointAtIndex(i, values: &point)
             pointArray.append(CGPoint(x: CGFloat(point[0]), y: CGFloat(point[1])))
         }
